@@ -1,5 +1,6 @@
 pandas
-pyarrow
-scikit-learn
-boto3
 pyyaml
+scikit-learn
+fastparquet
+pyarrow
+watchdog
