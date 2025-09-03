@@ -1,5 +1,5 @@
 data:
-  raw_path: "data/raw/"
+  raw_path: "data/incoming/"
   curated_path: "data/curated/"
 
 ingestion:
