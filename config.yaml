@@ -1,13 +1,21 @@
-columns:
-  drop_null_threshold: 0.3   # drop column if >30% null
-  enforce_types:
-    - column: "price"
-      type: float
-    - column: "date"
-      type: datetime
-duplicates: true
-anomaly_detection:
-  enabled: true
-  method: isolation_forest
-  contamination: 0.02
+data:
+  raw_path: "data/raw/"
+  curated_path: "data/curated/"
 
+ingestion:
+  sources: ["csv"]   # options: csv, api, huggingface, kaggle
+  continuous: true
+  poll_interval: 5   # seconds
+
+storage:
+  format: "parquet"
+  compression: "snappy"
+
+schema:
+  enable_auto: true
+  save_path: "data/schema/"
+  versioning: true
+
+drift:
+  enable: true
+  history_limit: 5   # keep last 5 schema versions
