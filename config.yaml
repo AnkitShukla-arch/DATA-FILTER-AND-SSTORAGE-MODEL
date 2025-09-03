@@ -1,1 +1,13 @@
+columns:
+  drop_null_threshold: 0.3   # drop column if >30% null
+  enforce_types:
+    - column: "price"
+      type: float
+    - column: "date"
+      type: datetime
+duplicates: true
+anomaly_detection:
+  enabled: true
+  method: isolation_forest
+  contamination: 0.02
 
