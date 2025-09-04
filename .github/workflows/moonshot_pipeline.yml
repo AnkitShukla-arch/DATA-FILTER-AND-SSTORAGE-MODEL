@@ -1,51 +1,47 @@
-name: Moonshot Pipeline CI
+name: Moonshot Pipeline
 
 on:
   push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+    branches:
+      - main
+  workflow_dispatch:
 
 jobs:
-  build:
+  run_pipeline:
     runs-on: ubuntu-24.04
 
     steps:
+      # 1️⃣ Checkout repo
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # 2️⃣ Set up Python
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v4
         with:
           python-version: "3.11"
 
-      - name: Cache pip
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-
+      # 3️⃣ Install dependencies
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+          pip install plotly scikit-learn joblib pandas
 
-      - name: Run Moonshot pipeline
+      # 4️⃣ Run Moonshot Pipeline
+      - name: Run Moonshot Pipeline
         run: python moonshot_pipeline_interactive.py
 
-      - name: Upload filtered CSV
+      # 5️⃣ Upload filtered CSV
+      - name: Upload Filtered CSV
         uses: actions/upload-artifact@v4
         with:
-          name: filtered-data
+          name: filtered_data
           path: data/filtered_data.csv
-          retention-days: 7
 
-      - name: Upload visualizations
+      # 6️⃣ Upload visualizations
+      - name: Upload Visualizations
         uses: actions/upload-artifact@v4
         with:
           name: visualizations
           path: data/visualizations/
-          retention-days: 7
-
