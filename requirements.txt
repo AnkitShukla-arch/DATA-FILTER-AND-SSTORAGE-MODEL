@@ -4,3 +4,5 @@ scikit-learn
 fastparquet
 pyarrow
 watchdog
+joblib
+plotly
