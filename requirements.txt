@@ -1,8 +1,9 @@
-pandas
 pyyaml
-scikit-learn
 fastparquet
 pyarrow
 watchdog
-joblib
-plotly
+pandas==2.1.1
+scikit-learn==1.3.0
+plotly==5.18.0
+joblib==1.3.2
+numpy==1.27.0
