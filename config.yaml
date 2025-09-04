@@ -1,21 +1,57 @@
-data:
-  raw_path: "data/raw/"
-  curated_path: "data/curated/"
+name: Moonshot Pipeline CI
 
-ingestion:
-  sources: ["csv"]   # options: csv, api, huggingface, kaggle
-  continuous: true
-  poll_interval: 5   # seconds
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
-storage:
-  format: "parquet"
-  compression: "snappy"
+jobs:
+  build:
+    runs-on: ubuntu-24.04
 
-schema:
-  enable_auto: true
-  save_path: "data/schema/"
-  versioning: true
+    steps:
+      # 1️⃣ Checkout the repo
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-drift:
-  enable: true
-  history_limit: 5   # keep last 5 schema versions
+      # 2️⃣ Set up Python
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      # 3️⃣ Cache pip packages (optional but faster)
+      - name: Cache pip
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      # 4️⃣ Install dependencies
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # 5️⃣ Run the Moonshot CSV pipeline
+      - name: Run pipeline
+        run: python moonshot_pipeline_interactive.py
+
+      # 6️⃣ Upload filtered CSV as artifact
+      - name: Upload filtered CSV
+        uses: actions/upload-artifact@v4
+        with:
+          name: filtered-data
+          path: data/filtered_data.csv
+          retention-days: 7
+
+      # 7️⃣ Upload Plotly visualizations (HTML)
+      - name: Upload visualizations
+        uses: actions/upload-artifact@v4
+        with:
+          name: visualizations
+          path: data/visualizations/
+          retention-days: 7
