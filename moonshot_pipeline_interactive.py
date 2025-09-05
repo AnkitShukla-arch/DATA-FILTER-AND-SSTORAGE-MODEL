@@ -9,7 +9,7 @@ from sklearn.metrics import classification_report
 import plotly.express as px
 
 # ===== CONFIG =====
-INPUT_CSV = "data/raw_data.csv"              # Your raw CSV
+INPUT_CSV = "data/incoming/mydata.csv"              # Your raw CSV
 FILTERED_CSV = "data/filtered_data.csv"      # Where filtered data will go
 VIS_DIR = "data/visualizations"              # Directory for Plotly visuals
 MODEL_FILE = "models/random_forest.pkl"     # Saved trained model
