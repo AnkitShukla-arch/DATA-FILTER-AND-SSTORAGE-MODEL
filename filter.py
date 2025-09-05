@@ -123,7 +123,7 @@ def visualize_interactive(filtered_df, schema_type):
 # ----------------------------
 if __name__ == "__main__":
     # Load CSV Dataset
-    df = pd.read_csv('data/curated/filtered_data.csv')  # replace with your CSV path
+    df = pd.read_csv('data/incoming/mydata.csv')  # replace with your CSV path
 
     # Labels for RandomForest training (1=keep, 0=drop)
     labels = [1 if col not in ['unnecessary_col1','unnecessary_col2'] else 0 for col in df.columns]
