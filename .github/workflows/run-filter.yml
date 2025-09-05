@@ -27,13 +27,13 @@ jobs:
         python filter.py --input ./data/incoming/mydata.csv --output ./data/curated/ --config config.yaml
 
     - name: Upload curated data
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: curated-data
         path: data/curated/
 
     - name: Upload logs
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: pipeline-logs
         path: logs/
