@@ -29,7 +29,7 @@ def extract_column_features(df):
 # ----------------------------
 # Train RandomForest Model
 # ----------------------------
-def train_filter_model(df, labels, save_path='column_filter_model.pkl'):
+def train_filter_model(df, labels, save_path='models/random_forest.pkl'):
     features_df = extract_column_features(df)
     features_df['keep'] = labels
 
