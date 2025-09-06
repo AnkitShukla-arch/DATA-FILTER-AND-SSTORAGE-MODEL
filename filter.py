@@ -1,153 +1,129 @@
-# moonshot_pipeline_interactive.py
-
+import os
+import sys
+import glob
 import pandas as pd
-import numpy as np
-import joblib
+import matplotlib.pyplot as plt
+import seaborn as sns
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
-import plotly.express as px
-import plotly.figure_factory as ff
+from sklearn.metrics import classification_report, accuracy_score
+import joblib
 
-# ----------------------------
-# Feature Extraction for Columns
-# ----------------------------
-def extract_column_features(df):
-    features = []
-    for col in df.columns:
-        col_data = df[col]
-        features.append({
-            'column': col,
-            'unique_ratio': col_data.nunique() / len(col_data),
-            'missing_ratio': col_data.isna().mean(),
-            'is_numeric': int(pd.api.types.is_numeric_dtype(col_data)),
-            'mean': col_data.mean() if pd.api.types.is_numeric_dtype(col_data) else 0,
-            'std': col_data.std() if pd.api.types.is_numeric_dtype(col_data) else 0,
-            'skew': col_data.skew() if pd.api.types.is_numeric_dtype(col_data) else 0
-        })
-    return pd.DataFrame(features)
+# Paths
+incoming_path = "data/incoming/*.csv"
+curated_path = "data/curated/filtered_data.csv"
+model_path = "random_forest.pkl"
+viz_dir = "data/visualizations/"
 
-# ----------------------------
-# Train RandomForest Model
-# ----------------------------
-def train_filter_model(df, labels, save_path='models/random_forest.pkl'):
-    features_df = extract_column_features(df)
-    features_df['keep'] = labels
+os.makedirs("data/curated", exist_ok=True)
+os.makedirs(viz_dir, exist_ok=True)
 
-    X = features_df[['unique_ratio', 'missing_ratio', 'is_numeric', 'mean', 'std', 'skew']]
-    y = features_df['keep']
+def load_data():
+    files = glob.glob(incoming_path)
+    if not files:
+        print("❌ No CSV found in data/incoming/")
+        sys.exit(1)
+    print(f"✅ Found input file: {files[0]}")
+    return pd.read_csv(files[0])
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+def filter_data(df: pd.DataFrame) -> pd.DataFrame:
+    print(f"📊 Raw data shape: {df.shape}")
+    df = df.dropna()
+    print(f"✅ After dropna: {df.shape}")
+    return df
 
-    clf = RandomForestClassifier(n_estimators=100, random_state=42)
-    clf.fit(X_train, y_train)
+def save_filtered(df: pd.DataFrame):
+    df.to_csv(curated_path, index=False)
+    print(f"✅ Filtered data saved → {curated_path}")
 
-    print("Train Accuracy:", clf.score(X_train, y_train))
-    print("Test Accuracy:", clf.score(X_test, y_test))
+def train_and_validate(df: pd.DataFrame):
+    if "target" not in df.columns:
+        print("⚠️ No 'target' column found → skipping model training")
+        return None
 
-    joblib.dump(clf, save_path)
-    print(f"Model saved to {save_path}")
-    return clf
+    X = df.drop("target", axis=1)
+    y = df["target"]
 
-# ----------------------------
-# Filter Columns Using RandomForest
-# ----------------------------
-def filter_columns_with_rf(df, clf):
-    features_df = extract_column_features(df)
-    X_new = features_df[['unique_ratio', 'missing_ratio', 'is_numeric', 'mean', 'std', 'skew']]
-    predictions = clf.predict(X_new)
-    filtered_columns = features_df['column'][predictions == 1].tolist()
-    return df[filtered_columns]
-
-# ----------------------------
-# Detect Schema Type
-# ----------------------------
-def detect_schema_type(df):
-    num_columns = len(df.columns)
-    if num_columns <= 5:
-        return '3D'
-    elif num_columns <= 10:
-        return '5D'
-    elif num_columns <= 20:
-        return 'Star'
-    else:
-        return 'Snowflake'
-
-# ----------------------------
-# Generate Schema
-# ----------------------------
-def generate_schema(df, schema_type):
-    schema = {'type': schema_type, 'fact_table': None, 'dimension_tables': []}
-    if schema_type in ['3D', '5D']:
-        schema['fact_table'] = df.iloc[:, :1]
-        schema['dimension_tables'] = [df.iloc[:, 1:]]
-    elif schema_type == 'Star':
-        schema['fact_table'] = df.iloc[:, :1]
-        schema['dimension_tables'] = [df.iloc[:, 1:]]
-    elif schema_type == 'Snowflake':
-        schema['fact_table'] = df.iloc[:, :1]
-        schema['dimension_tables'] = [df.iloc[:, i:i+5] for i in range(1, len(df.columns), 5)]
-    return schema
-
-# ----------------------------
-# Interactive Visualization
-# ----------------------------
-def visualize_interactive(filtered_df, schema_type):
-    # Column Data Type Distribution
-    col_types = filtered_df.dtypes.value_counts().reset_index()
-    col_types.columns = ['dtype', 'count']
-    fig1 = px.bar(col_types, x='dtype', y='count', color='dtype', title='Column Data Types in Filtered Dataset')
-    fig1.show()
-
-    # Missing Values Heatmap
-    z = filtered_df.isna().astype(int).values
-    fig2 = ff.create_annotated_heatmap(
-        z=z,
-        x=list(filtered_df.columns),
-        y=list(range(len(filtered_df))),
-        colorscale='Viridis',
-        showscale=True
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, random_state=42
     )
-    fig2.update_layout(title_text='Missing Values Heatmap (Interactive)')
-    fig2.show()
 
-    # Basic Stats Boxplots for Numeric Columns
-    numeric_cols = filtered_df.select_dtypes(include=np.number).columns.tolist()
-    if numeric_cols:
-        fig3 = px.box(filtered_df, y=numeric_cols, title='Boxplot of Numeric Columns (Filtered Dataset)')
-        fig3.show()
+    model = RandomForestClassifier(n_estimators=100, random_state=42)
+    model.fit(X_train, y_train)
 
-    print(f"Detected Schema Type for Visualization: {schema_type}")
+    preds = model.predict(X_test)
+    acc = accuracy_score(y_test, preds)
+    print(f"✅ Model trained → Accuracy: {acc:.2f}")
 
-# ----------------------------
-# Main Pipeline
-# ----------------------------
+    print("\nClassification Report:\n", classification_report(y_test, preds))
+
+    joblib.dump(model, model_path)
+    print(f"✅ Model saved → {model_path}")
+
+    return model, X, y
+
+def create_visualizations(df: pd.DataFrame, model=None, X=None, y=None):
+    # Correlation heatmap
+    plt.figure(figsize=(10, 6))
+    sns.heatmap(df.corr(numeric_only=True), annot=True, cmap="coolwarm")
+    plt.title("Correlation Heatmap")
+    plt.savefig(os.path.join(viz_dir, "correlation_heatmap.png"))
+    plt.close()
+    print("📊 Saved correlation heatmap")
+
+    # Class distribution
+    if "target" in df.columns:
+        plt.figure(figsize=(6, 4))
+        df["target"].value_counts().plot(kind="bar", color="skyblue")
+        plt.title("Target Class Distribution")
+        plt.savefig(os.path.join(viz_dir, "class_distribution.png"))
+        plt.close()
+        print("📊 Saved class distribution plot")
+
+    # Feature importance
+    if model and X is not None:
+        importances = model.feature_importances_
+        feat_imp = pd.Series(importances, index=X.columns).sort_values(ascending=False)
+
+        plt.figure(figsize=(8, 5))
+        feat_imp.plot(kind="bar")
+        plt.title("Feature Importance")
+        plt.tight_layout()
+        plt.savefig(os.path.join(viz_dir, "feature_importance.png"))
+        plt.close()
+        print("📊 Saved feature importance plot")
+
+def prepare_schema_hooks(df: pd.DataFrame):
+    # Placeholder for star/snowflake schema prep
+    print("🛠️ Preparing schema transformations (stub)")
+    schema_info = {
+        "columns": list(df.columns),
+        "row_count": df.shape[0],
+        "schema_type": "star/snowflake (to be implemented)"
+    }
+    pd.DataFrame([schema_info]).to_json("data/curated/schema_metadata.json", orient="records")
+    print("✅ Schema metadata saved → data/curated/schema_metadata.json")
+
+def main():
+    try:
+        df = load_data()
+        df = filter_data(df)
+        save_filtered(df)
+
+        model_info = train_and_validate(df)
+        if model_info:
+            model, X, y = model_info
+            create_visualizations(df, model, X, y)
+        else:
+            create_visualizations(df)
+
+        prepare_schema_hooks(df)
+
+        print("🚀 Moonshot pipeline completed successfully")
+
+    except Exception as e:
+        print(f"❌ Pipeline failed: {e}")
+        sys.exit(1)
+
 if __name__ == "__main__":
-    # Load CSV Dataset
-    df = pd.read_csv('data/incoming/mydata.csv')  # replace with your CSV path
-
-    # Labels for RandomForest training (1=keep, 0=drop)
-    labels = [1 if col not in ['unnecessary_col1','unnecessary_col2'] else 0 for col in df.columns]
-
-    # Train RandomForest Model
-    clf = train_filter_model(df, labels)
-
-    # Filter Columns
-    filtered_df = filter_columns_with_rf(df, clf)
-    print("Filtered Columns:", filtered_df.columns.tolist())
-
-    # Detect Schema Type
-    schema_type = detect_schema_type(filtered_df)
-    print("Detected Schema Type:", schema_type)
-
-    # Generate Schema
-    schema = generate_schema(filtered_df, schema_type)
-    print("Schema Generated:", schema_type)
-
-    # Save Filtered Data
-    filtered_df.to_csv('data/filtered_data.csv', index=False)
-    print("Filtered data saved to data/filtered_data.csv")
-
-    # Interactive Visualization
-    visualize_interactive(filtered_df, schema_type)
-
-    print("Moonshot pipeline complete with interactive visualization ✅")
+    main()
