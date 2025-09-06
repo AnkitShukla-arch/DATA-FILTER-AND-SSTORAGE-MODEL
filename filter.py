@@ -5,6 +5,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, classification_report
 import sys
+from visualization import plot_target_distribution, plot_feature_importance, plot_correlation_heatmap
 
 
 
