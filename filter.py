@@ -5,7 +5,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, classification_report
 import sys
-from visualization import plot_target_distribution, plot_feature_importance, plot_correlation_heatmap
+from visualizations import plot_target_distribution, plot_feature_importance, plot_correlation_heatmap
 
 
 
@@ -19,9 +19,9 @@ from utils import (
     ensure_directories,
 )
 from visualizations import (
-    correlation_heatmap,
-    class_distribution,
-    feature_importance,
+    plot_correlation_heatmap,
+    plot_class_distribution,
+    plot_feature_importance,
 )
 
 
