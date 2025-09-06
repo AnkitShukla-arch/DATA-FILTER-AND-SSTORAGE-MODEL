@@ -9,7 +9,7 @@ import sys
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "data"))
 
-from visualization import plot_target_distribution, plot_feature_importance, plot_correlation_heatmap
+from visualization import plot_target_distribution, plot_feature_importance, plot_correlation_heatmap(df)
 
 
 # Local imports
