@@ -29,7 +29,7 @@ jobs:
           python filter.py
 
       - name: Upload trained model artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v4.3.3
         with:
           name: random-forest-model
           path: random_forest.pkl
