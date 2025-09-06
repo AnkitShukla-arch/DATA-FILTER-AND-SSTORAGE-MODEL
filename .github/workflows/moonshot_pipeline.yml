@@ -1,36 +1,40 @@
-name: Moonshot Pipeline
+name: Moonshot Data Pipeline
 
 on:
   push:
-    branches:
-      - main
+    branches: [ "main" ]
   pull_request:
-    branches:
-      - main
+    branches: [ "main" ]
 
 jobs:
-  build-and-test:
-    runs-on: ubuntu-24.04
+  build:
+    runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
+    - name: Checkout code
       uses: actions/checkout@v4
 
     - name: Set up Python
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v4
       with:
-        python-version: 3.11
-
-    - name: Upgrade pip
-      run: python -m pip install --upgrade pip
+        python-version: "3.11"
 
     - name: Install dependencies
-      run: pip install -r requirements.txt
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
 
-    - name: Run Filter Pipeline
-      run: python filter.py
+    - name: Run Data Filter & Model Training
+      run: |
+        python filter.py
 
-    - name: Upload Artifacts
+    - name: Upload filtered dataset
+      uses: actions/upload-artifact@v4
+      with:
+        name: filtered-data
+        path: data/curated/filtered_data.csv
+
+    - name: Upload trained model
       uses: actions/upload-artifact@v4
       with:
         name: trained-model
