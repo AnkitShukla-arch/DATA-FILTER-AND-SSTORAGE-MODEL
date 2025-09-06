@@ -20,7 +20,7 @@ from utils import (
 )
 from visualizations import (
     plot_correlation_heatmap,
-    plot_class_distribution,
+    plot_target_distribution,
     plot_feature_importance,
 )
 
