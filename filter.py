@@ -13,7 +13,7 @@ from utils import (
     save_dataframe,
     ensure_directories,
 )
-from visualization.py import (
+from visualization import (
     correlation_heatmap,
     class_distribution,
     feature_importance,
