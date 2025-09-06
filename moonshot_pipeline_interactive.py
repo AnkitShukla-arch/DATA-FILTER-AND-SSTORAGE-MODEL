@@ -1,38 +1,45 @@
 # moonshot_pipeline_interactive.py
-import pandas as pd
-import numpy as np
 import os
 import pickle
+import pandas as pd
+import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report
-import plotly.express as px
+
+# Import utilities and visualization functions
+from utils import get_latest_csv, load_csv, save_dataframe, ensure_directories
+from visualizations import correlation_heatmap, class_distribution, feature_importance
 
 # ===== CONFIG =====
-INPUT_CSV = "data/incoming/mydata.csv"              # Your raw CSV
-FILTERED_CSV = "data/filtered_data.csv"      # Where filtered data will go
-VIS_DIR = "data/visualizations"              # Directory for Plotly visuals
-MODEL_FILE = "models/random_forest.pkl"     # Saved trained model
-TARGET_COL = "target"                        # Column to predict/filter
+INPUT_CSV = "data/incoming/mydata.csv"       # Raw CSV
+FILTERED_CSV = "data/filtered_data.csv"      # Filtered CSV
+VIS_DIR = "data/visualizations"              # Directory for plots
+MODEL_FILE = "models/random_forest.pkl"      # Saved RandomForest model
+TARGET_COL = "target"                         # Target column to predict/filter
 
-os.makedirs(VIS_DIR, exist_ok=True)
-os.makedirs("models", exist_ok=True)
-os.makedirs("data", exist_ok=True)
+# ===== ENSURE DIRECTORIES =====
+ensure_directories([VIS_DIR, "models", "data/incoming"])
 
-# ===== 1️⃣ Load CSV =====
+# ===== 1️⃣ LOAD CSV =====
 print("[INFO] Loading CSV...")
+if not os.path.exists(INPUT_CSV):
+    raise FileNotFoundError(f"{INPUT_CSV} not found. Please add your dataset.")
+
 df = pd.read_csv(INPUT_CSV)
 
-# Simple placeholder if TARGET_COL missing
+# Placeholder target if missing
 if TARGET_COL not in df.columns:
     df[TARGET_COL] = np.random.randint(0, 2, size=len(df))
 
-# ===== 2️⃣ Train RandomForest (if model not exists) =====
-if not os.path.exists(MODEL_FILE):
-    print("[INFO] Training RandomForest...")
-    X = df.drop(TARGET_COL, axis=1).select_dtypes(include=np.number)  # numeric features
-    y = df[TARGET_COL]
+# ===== 2️⃣ PREPARE FEATURES =====
+# Convert categorical variables using one-hot encoding
+X = pd.get_dummies(df.drop(TARGET_COL, axis=1))
+y = df[TARGET_COL]
 
+# ===== 3️⃣ TRAIN OR LOAD RANDOM FOREST =====
+if not os.path.exists(MODEL_FILE):
+    print("[INFO] Training RandomForest model...")
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
     rf = RandomForestClassifier(n_estimators=100, random_state=42)
     rf.fit(X_train, y_train)
@@ -40,7 +47,6 @@ if not os.path.exists(MODEL_FILE):
     y_pred = rf.predict(X_test)
     print("[INFO] Classification Report:\n", classification_report(y_test, y_pred))
 
-    # Save model
     with open(MODEL_FILE, "wb") as f:
         pickle.dump(rf, f)
 else:
@@ -48,40 +54,23 @@ else:
     with open(MODEL_FILE, "rb") as f:
         rf = pickle.load(f)
 
-# ===== 3️⃣ Filter Data =====
+# ===== 4️⃣ FILTER DATA =====
 print("[INFO] Filtering data...")
-X_all = df.drop(TARGET_COL, axis=1).select_dtypes(include=np.number)
-df["predicted_target"] = rf.predict(X_all)
-filtered_df = df[df["predicted_target"] == 1]  # Keep only relevant rows
-
-filtered_df.to_csv(FILTERED_CSV, index=False)
+df["predicted_target"] = rf.predict(X)
+filtered_df = df[df["predicted_target"] == 1]  # Keep relevant rows
+save_dataframe(filtered_df, FILTERED_CSV)
 print(f"[INFO] Filtered CSV saved to {FILTERED_CSV}")
 
-# ===== 4️⃣ Generate placeholder schemas =====
-print("[INFO] Generating schema placeholders...")
+# ===== 5️⃣ GENERATE VISUALIZATIONS =====
+print("[INFO] Generating visualizations...")
+# Correlation heatmap
+correlation_heatmap(filtered_df, save_path=VIS_DIR)
 
-def generate_star_schema(df):
-    # Placeholder: create a fact table + dimension tables
-    fact = df.copy()
-    dimensions = {col: df[[col]].drop_duplicates() for col in df.columns if col != TARGET_COL}
-    return fact, dimensions
+# Class distribution plot
+class_distribution(filtered_df, TARGET_COL, save_path=VIS_DIR)
 
-def generate_snowflake_schema(df):
-    # Placeholder: similar to star but normalized dimensions
-    fact, dimensions = generate_star_schema(df)
-    # Here you could normalize dimension tables further
-    return fact, dimensions
-
-fact_star, dims_star = generate_star_schema(filtered_df)
-fact_snow, dims_snow = generate_snowflake_schema(filtered_df)
-
-# ===== 5️⃣ Plotly Visualizations =====
-print("[INFO] Creating visualizations...")
-numeric_cols = filtered_df.select_dtypes(include=np.number).columns.tolist()
-for col in numeric_cols:
-    fig = px.histogram(filtered_df, x=col, title=f"Distribution of {col}")
-    fig.write_html(os.path.join(VIS_DIR, f"{col}_hist.html"))
+# Feature importance
+feature_importance(rf, X.columns, save_path=VIS_DIR)
 
 print(f"[INFO] Visualizations saved in {VIS_DIR}")
 print("[INFO] Pipeline completed successfully!")
-
