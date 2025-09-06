@@ -55,3 +55,13 @@ jobs:
           name: visualizations
           path: data/visualizations/
           retention-days: 7
+
+          - name: Run training script
+  run: python train_model.py
+
+- name: Upload model artifact
+  uses: actions/upload-artifact@v4
+  with:
+    name: random-forest-model
+    path: models/random_forest.pkl
+
