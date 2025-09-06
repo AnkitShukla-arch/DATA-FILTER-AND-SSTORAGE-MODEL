@@ -7,9 +7,6 @@ from sklearn.metrics import accuracy_score, classification_report
 import sys
 
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "data"))
-
-from visualization import plot_target_distribution, plot_feature_importance, plot_correlation_heatmap
 
 
 # Local imports
@@ -20,7 +17,7 @@ from utils import (
     save_dataframe,
     ensure_directories,
 )
-from visualization import (
+from visualizations import (
     correlation_heatmap,
     class_distribution,
     feature_importance,
