@@ -98,7 +98,7 @@ for folder in ["data", "data/visualizations", "models"]:
 
     print("🔹 Generating visualizations...")
     plot_correlation_heatmap
-    plot_class_distribution
+    plot_target_distribution
     plot_feature_importance
 
     print("✅ Pipeline complete!")
