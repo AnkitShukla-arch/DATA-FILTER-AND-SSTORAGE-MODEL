@@ -14,28 +14,6 @@ safe_makedirs("data/filtered")
 
 
 
-def safe_makedirs(path, force=False):
-    """
-    Create directory at `path` if it doesn't exist.
-    If a non-directory (file/symlink) exists at `path`:
-      - if force=False: raise FileExistsError with a clear message
-      - if force=True: remove the file and create the directory
-    """
-    if os.path.exists(path):
-        if os.path.isdir(path):
-            return
-        # path exists but is not a dir
-        if force:
-            # remove the file/symlink then create directory
-            os.remove(path)
-            os.makedirs(path, exist_ok=True)
-            return
-        raise FileExistsError(
-            f"Path already exists and is not a directory: {path!r}. "
-            "Rename or remove it, or call safe_makedirs(path, force=True) to overwrite."
-        )
-    # path doesn't exist -> create
-    os.makedirs(path, exist_ok=True)
 
 
 
