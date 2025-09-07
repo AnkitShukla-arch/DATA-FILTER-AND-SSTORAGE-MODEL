@@ -90,14 +90,11 @@ def run_pipeline():
     print(f"   Accuracy: {acc:.4f}")
     print(classification_report(y_test, y_pred))
 
-    viz_dir="data/visualizations/"
-    safe_makedirs(viz_dir)
-    #print("🔹 Saving trained model...")
-    #os.makedirs("models", exist_ok=True)
-    #joblib.dump(model, "models/random_forest.pkl")
 
-    print("🔹 Saving filtered dataset...")
-    save_dataframe(df, "data/curated/filtered_output.csv")
+# === Safe directory creation ===
+for folder in ["data", "data/visualizations", "models"]:
+    os.makedirs(folder, exist_ok=True)
+
 
     print("🔹 Generating visualizations...")
     correlation_heatmap(df)
