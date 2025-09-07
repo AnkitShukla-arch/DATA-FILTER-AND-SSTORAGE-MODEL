@@ -3,6 +3,27 @@ import json
 import pandas as pd
 from datetime import datetime
 
+def safe_makedirs(path, force=False):
+    """
+    Create directory at `path` if it doesn’t exist.
+    If a non-directory (file/symlink) exists at `path`:
+      - if force=False: raise FileExistsError
+      - if force=True: remove it and create directory
+    """
+    if os.path.exists(path):
+        if os.path.isdir(path):
+            return
+        if force:
+            os.remove(path)
+            os.makedirs(path, exist_ok=True)
+            return
+        raise FileExistsError(
+            f"Path already exists and is not a directory: {path!r}. "
+            "Rename it, remove it, or call safe_makedirs(path, force=True) to overwrite."
+        )
+    os.makedirs(path, exist_ok=True)
+
+
 
 def get_latest_csv(input_dir: str = "data/incoming") -> str:
     """
