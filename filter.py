@@ -12,12 +12,6 @@ from utils import safe_makedirs
 safe_makedirs("data/visualizations")
 safe_makedirs("data/filtered")
 
-
-
-
-
-
-
 # Local imports
 from utils import (
     get_latest_csv,
