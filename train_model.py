@@ -41,6 +41,15 @@ from sklearn.metrics import (
 # ---------------------------
 # Helpers
 # ---------------------------
+
+from utils import safe_makedirs
+
+# make sure model directory exists
+safe_makedirs("models")
+
+# when saving model
+joblib.dump(model, "models/random_forest.pkl")
+
 def ensure_dirs():
     os.makedirs("models", exist_ok=True)
     os.makedirs("data/visualizations", exist_ok=True)
