@@ -97,7 +97,7 @@ for folder in ["data", "data/visualizations", "models"]:
 
 
     print("🔹 Generating visualizations...")
-    plot_correlation_heatmap(df)
+    plot_correlation_heatmap
     plot_class_distribution(df, "target")
     plot_feature_importance(model, X.columns)
 
