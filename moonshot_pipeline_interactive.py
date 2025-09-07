@@ -18,6 +18,12 @@ VIS_DIR = "data/visualizations"              # Directory for plots
 MODEL_FILE = "models/random_forest.pkl"      # Saved RandomForest model
 TARGET_COL = "target"                         # Target column to predict/filter
 
+safe_makedirs("data")          # parent data folder
+safe_makedirs("data/filtered") # filtered data folder
+safe_makedirs(VIS_DIR)         # visualizations folder
+safe_makedirs("models")        # models folder
+
+
 # ===== ENSURE DIRECTORIES =====
 ensure_directories([VIS_DIR, "models", "data/incoming"])
 
