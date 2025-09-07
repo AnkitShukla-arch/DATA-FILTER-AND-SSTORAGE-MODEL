@@ -68,10 +68,9 @@ def run_pipeline():
     print(classification_report(y_test, y_pred))
 
 
-# === Safe directory creation ===
-for folder in ["data", "data/visualizations", "models"]:
-    os.makedirs(folder, exist_ok=True)
-
+    safe_makedirs(viz_dir)
+    safe_makedirs("models")
+    safe_makedirs("data")
 
     print("🔹 Generating visualizations...")
     plot_correlation_heatmap
