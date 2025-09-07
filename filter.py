@@ -8,9 +8,6 @@ import sys
 from visualizations import plot_target_distribution, plot_feature_importance, plot_correlation_heatmap
 from utils import safe_makedirs
 
-# instead of os.makedirs("data/visualizations", exist_ok=True)
-safe_makedirs("data/visualizations")
-safe_makedirs("data/filtered")
 
 # Local imports
 from utils import (
@@ -25,6 +22,13 @@ from visualizations import (
     plot_target_distribution,
     plot_feature_importance,
 )
+
+# === Make sure required folders exist ===
+safe_makedirs("data")
+safe_makedirs("data/filtered")
+safe_makedirs("data/visualizations")
+safe_makedirs("models")
+
 
 
 def run_pipeline():
@@ -66,11 +70,6 @@ def run_pipeline():
     acc = accuracy_score(y_test, y_pred)
     print(f"   Accuracy: {acc:.4f}")
     print(classification_report(y_test, y_pred))
-
-
-    safe_makedirs(viz_dir)
-    safe_makedirs("models")
-    safe_makedirs("data")
 
     print("🔹 Generating visualizations...")
     plot_correlation_heatmap
