@@ -9,7 +9,7 @@ from sklearn.metrics import classification_report
 
 # Import utilities and visualization functions
 from utils import get_latest_csv, load_csv, save_dataframe, ensure_directories
-from visualizations import correlation_heatmap, class_distribution, feature_importance
+from visualizations import plot_correlation_heatmap, plot_target_distribution, plot_feature_importance
 
 # ===== CONFIG =====
 INPUT_CSV = "data/incoming/mydata.csv"       # Raw CSV
@@ -70,13 +70,13 @@ print(f"[INFO] Filtered CSV saved to {FILTERED_CSV}")
 # ===== 5️⃣ GENERATE VISUALIZATIONS =====
 print("[INFO] Generating visualizations...")
 # Correlation heatmap
-correlation_heatmap(filtered_df, save_path=VIS_DIR)
+plot_correlation_heatmap(filtered_df, save_path=VIS_DIR)
 
 # Class distribution plot
-class_distribution(filtered_df, TARGET_COL, save_path=VIS_DIR)
+plot_target_distribution(filtered_df, TARGET_COL, save_path=VIS_DIR)
 
 # Feature importance
-feature_importance(rf, X.columns, save_path=VIS_DIR)
+plot_feature_importance(rf, X.columns, save_path=VIS_DIR)
 
 print(f"[INFO] Visualizations saved in {VIS_DIR}")
 print("[INFO] Pipeline completed successfully!")
