@@ -39,3 +39,8 @@ jobs:
       with:
         name: trained-model
         path: random_forest.pkl
+        
+    - name: Run tests 
+      run: |
+        pip install pytest
+        pytest -v
