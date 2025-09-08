@@ -51,9 +51,9 @@ safe_makedirs("models")
 joblib.dump(model, "models/random_forest.pkl")
 
 def ensure_dirs():
-    os.makedirs("models", exist_ok=True)
-    os.makedirs("data/visualizations", exist_ok=True)
-    os.makedirs("data/curated", exist_ok=True)
+    safe_makedirs("models")
+    safe_makedirs("data/visualizations")
+    safe_makedirs("data/curated")
 
 def get_latest_csv(input_dir="data/incoming"):
     if not os.path.isdir(input_dir):
