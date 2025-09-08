@@ -48,7 +48,7 @@ from utils import safe_makedirs
 safe_makedirs("models")
 
 # when saving model
-joblib.dump(model, "models/random_forest.pkl")
+joblib.dump(models, "models/random_forest.pkl")
 
 def ensure_dirs():
     safe_makedirs("models")
