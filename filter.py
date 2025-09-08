@@ -7,6 +7,13 @@ from sklearn.metrics import accuracy_score, classification_report
 import sys
 from visualizations import plot_target_distribution, plot_feature_importance, plot_correlation_heatmap
 from utils import safe_makedirs
+# === Make sure required folders exist ===
+safe_makedirs("data")
+safe_makedirs("data/filtered")
+safe_makedirs("data/visualizations")
+safe_makedirs("models")
+
+
 
 
 # Local imports
@@ -22,13 +29,6 @@ from visualizations import (
     plot_target_distribution,
     plot_feature_importance,
 )
-
-# === Make sure required folders exist ===
-safe_makedirs("data")
-safe_makedirs("data/filtered")
-safe_makedirs("data/visualizations")
-safe_makedirs("models")
-
 
 
 def run_pipeline():
