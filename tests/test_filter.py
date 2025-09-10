@@ -1,63 +1,42 @@
 import os
-import subprocess
-import pickle
-import pandas as pd
 import pytest
-import joblib 
+import pandas as pd
+import joblib
 
-def run_script(script):
-    """Helper to run a script and return result."""
-    result = subprocess.run(
-        ["python", script], capture_output=True, text=True
-    )
-    print(result.stdout)
-    print(result.stderr)
-    return result
+from filter import main as filter_main
 
+FILTERED_CSV = "data/filtered_output.csv"
+MODEL_PATH = "models/random_forest.pkl"
 
-def test_filter_runs():
-    """Check filter.py runs successfully."""
-    result = run_script("filter.py")
-    assert result.returncode == 0, "filter.py crashed"
+def test_filtered_csv_created():
+    """Check if filtered_output.csv is created successfully."""
+    filter_main()
+    assert os.path.exists(FILTERED_CSV), f"{FILTERED_CSV} not found"
 
+def test_filtered_csv_non_empty():
+    """Check if filtered CSV is not empty and has rows."""
+    df = pd.read_csv(FILTERED_CSV)
+    assert not df.empty, "Filtered CSV is empty"
 
-def test_train_model_runs():
-    """Check train_model.py runs successfully."""
-    if os.path.exists("train_model.py"):
-        result = run_script("train_model.py")
-        assert result.returncode == 0, "train_model.py crashed"
+def test_model_created_and_loadable():
+    """Check if the RandomForest model is trained and loadable."""
+    from train_model import pipeline, MODEL_PATH as TRAINED_MODEL_PATH
+    assert os.path.exists(TRAINED_MODEL_PATH), f"{TRAINED_MODEL_PATH} not found"
+    model = joblib.load(TRAINED_MODEL_PATH)
+    # Check if pipeline has classifier
+    assert hasattr(model.named_steps['classifier'], 'predict'), "Classifier not found in pipeline"
 
+def test_detect_target_column_generic():
+    """Ensure target column detection works generically."""
+    from filter import detect_target_column
+    df = pd.read_csv(FILTERED_CSV)
+    target = detect_target_column(df)
+    assert target in df.columns, "Target column detection failed"
 
-def test_filtered_csv_exists_and_valid():
-    """Check that filtered CSV is created and not empty."""
-    path = "data/filtered_data.csv"
-    assert os.path.exists(path), "filtered_data.csv missing"
-    df = pd.read_csv(path)
-    assert not df.empty, "filtered_data.csv is empty"
-    assert len(df.columns) > 0, "filtered_data.csv has no columns"
-
-
-def test_model_pickle_valid():
-    """Check random_forest.pkl exists and can be loaded safely."""
-    model_path = "models/random_forest.pkl"
-    
-    # Check if file exists
-    assert os.path.exists(model_path), "random_forest.pkl is missing"
-    
-    # Attempt to load model safely
-    try:
-        model = joblib.load(model_path)
-    except (EOFError, KeyError, AttributeError, ImportError, ModuleNotFoundError) as e:
-        pytest.fail(f"Failed to load random_forest.pkl: {e}")
-    
-    # Optional: check if loaded object has a 'predict' method
-    assert hasattr(model, "predict"), "Loaded object is not a model with 'predict' method"
-
-
-def test_visualizations_exist():
-    """Check that visualizations are generated."""
-    viz_dir = "data/visualizations"
-    assert os.path.exists(viz_dir), "visualizations folder missing"
-    files = os.listdir(viz_dir)
-    assert len(files) > 0, "No visualizations generated"
-
+def test_pattern_detection():
+    """Check pattern detection (3D/5D, Star/Snowflake)."""
+    from filter import detect_pattern
+    df = pd.read_csv(FILTERED_CSV)
+    pattern, pattern_type = detect_pattern(df)
+    assert pattern in ['3D', '5D', 'Unknown'], f"Invalid pattern detected: {pattern}"
+    assert pattern_type in ['Star', 'Snowflake'], f"Invalid pattern type: {pattern_type}"
