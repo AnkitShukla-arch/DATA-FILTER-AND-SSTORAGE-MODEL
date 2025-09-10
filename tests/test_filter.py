@@ -42,7 +42,7 @@ def test_model_pickle_valid():
     model_path = "models/random_forest.pkl"
     assert os.path.exists(model_path), "random_forest.pkl missing"
     model=joblib.load(model_path)
-    assert model is not None,
+    assert model is not None
 
 
 def test_visualizations_exist():
