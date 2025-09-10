@@ -1,83 +1,66 @@
-# filter.py
 import os
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
-
 from utils import safe_makedirs
 
-# === Setup required folders ===
-safe_makedirs("data")
-safe_makedirs("data/filtered")
-safe_makedirs("data/visualizations")
-safe_makedirs("models")
+INPUT_DIR = "data/incoming/"
+OUTPUT_DIR = "data/"
+OUTPUT_FILE = os.path.join(OUTPUT_DIR, "filtered_output.csv")
 
-INPUT_CSV = "data/incoming/mydata.csv"
-FILTERED_CSV = "data/filtered_data.csv"
-VIZ_DIR = "data/visualizations"
+safe_makedirs(OUTPUT_DIR)
 
-print("[INFO] Starting filter.py pipeline...")
+def detect_target_column(df):
+    # Heuristic: numeric column with less than 10 unique values
+    for col in df.columns:
+        if pd.api.types.is_numeric_dtype(df[col]) and df[col].nunique() < 50:
+            return col
+    return df.columns[-1]  # fallback to last column
 
-# === 1️⃣ Load CSV or create dummy ===
-if os.path.exists(INPUT_CSV):
-    df = pd.read_csv(INPUT_CSV)
-    print(f"[INFO] Loaded {INPUT_CSV} with shape {df.shape}")
-else:
-    print("[WARN] No incoming CSV found, creating dummy dataset...")
-    df = pd.DataFrame({
-        "feature1": np.random.randn(50),
-        "feature2": np.random.randint(0, 100, 50),
-        "target": np.random.choice([0, 1], 50)
-    })
+def clean_data(df):
+    # Convert numeric-like strings to numbers
+    for col in df.columns:
+        df[col] = pd.to_numeric(df[col].astype(str).str.replace('"', ''), errors='ignore')
 
-# Ensure target column exists
-if "target" not in df.columns:
-    print("[WARN] Target column missing. Creating dummy target...")
-    df["target"] = np.random.choice([0, 1], len(df))
+    # Fill NaNs
+    for col in df.columns:
+        if df[col].dtype == object:
+            df[col] = df[col].fillna("Unknown")
+        else:
+            df[col] = df[col].fillna(df[col].median())
 
-# === 2️⃣ Filter step (basic logic: keep target==1) ===
-filtered_df = df[df["target"] == 1].copy()
-if filtered_df.empty:
-    print("[WARN] Filtered data is empty. Keeping 5 random rows instead.")
-    filtered_df = df.sample(min(5, len(df)))
+    return df
 
-filtered_df.to_csv(FILTERED_CSV, index=False)
-print(f"[INFO] Filtered data saved → {FILTERED_CSV} ({filtered_df.shape[0]} rows)")
+def detect_pattern(df):
+    rows, cols = df.shape
+    pattern = "Unknown"
+    if cols == 5:
+        pattern = "5D"
+    elif cols == 3:
+        pattern = "3D"
 
-# === 3️⃣ Schema placeholders ===
-def generate_star_schema(df):
-    fact = df.copy()
-    dimensions = {col: df[[col]].drop_duplicates() for col in df.columns if col != "target"}
-    return fact, dimensions
+    # Star vs snowflake detection
+    unique_rows = df.drop_duplicates().shape[0]
+    pattern_type = "Star" if unique_rows < rows else "Snowflake"
+    return pattern, pattern_type
 
-def generate_snowflake_schema(df):
-    fact, dimensions = generate_star_schema(df)
-    return fact, dimensions
+def main():
+    all_files = [f for f in os.listdir(INPUT_DIR) if f.endswith(".csv")]
+    if not all_files:
+        raise FileNotFoundError(f"No CSV files found in {INPUT_DIR}")
 
-fact_star, dims_star = generate_star_schema(filtered_df)
-fact_snow, dims_snow = generate_snowflake_schema(filtered_df)
-print("[INFO] Schema placeholders generated.")
+    # Read all files and concatenate
+    df_list = [pd.read_csv(os.path.join(INPUT_DIR, f)) for f in all_files]
+    df = pd.concat(df_list, ignore_index=True)
 
-# === 4️⃣ Visualizations ===
-def save_plot(fig, name):
-    path = os.path.join(VIZ_DIR, name)
-    fig.savefig(path, bbox_inches="tight")
-    plt.close(fig)
+    df = clean_data(df)
+    target_column = detect_target_column(df)
+    pattern, pattern_type = detect_pattern(df)
 
-# Target distribution
-fig, ax = plt.subplots()
-sns.countplot(x="target", data=df, ax=ax)
-ax.set_title("Target Distribution")
-save_plot(fig, "target_distribution.png")
+    print(f"Detected target column: {target_column}")
+    print(f"Detected pattern: {pattern}, type: {pattern_type}")
 
-# Numeric histograms
-for col in df.select_dtypes(include=np.number).columns:
-    fig, ax = plt.subplots()
-    sns.histplot(df[col], kde=True, ax=ax)
-    ax.set_title(f"Distribution of {col}")
-    save_plot(fig, f"{col}_hist.png")
+    df.to_csv(OUTPUT_FILE, index=False)
+    print(f"Filtered CSV saved to {OUTPUT_FILE}")
 
-print(f"[INFO] Visualizations saved → {VIZ_DIR}")
-
-print("[INFO] filter.py completed successfully ✅")
+if __name__ == "__main__":
+    main()
