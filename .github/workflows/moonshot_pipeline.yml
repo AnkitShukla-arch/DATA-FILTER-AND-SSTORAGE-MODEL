@@ -48,3 +48,6 @@ jobs:
 
     - name: Run tests
       run: pytest -v 
+
+    - name: Run debug
+      run: python debug.py
