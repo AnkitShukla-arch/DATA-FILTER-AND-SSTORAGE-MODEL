@@ -38,11 +38,20 @@ def test_filtered_csv_exists_and_valid():
 
 
 def test_model_pickle_valid():
-    """Check random_forest.pkl exists and can be loaded."""
+    """Check random_forest.pkl exists and can be loaded safely."""
     model_path = "models/random_forest.pkl"
-    assert os.path.exists(model_path), "random_forest.pkl missing"
-    model=joblib.load(model_path)
-    assert model is not None
+    
+    # Check if file exists
+    assert os.path.exists(model_path), "random_forest.pkl is missing"
+    
+    # Attempt to load model safely
+    try:
+        model = joblib.load(model_path)
+    except (EOFError, KeyError, AttributeError, ImportError, ModuleNotFoundError) as e:
+        pytest.fail(f"Failed to load random_forest.pkl: {e}")
+    
+    # Optional: check if loaded object has a 'predict' method
+    assert hasattr(model, "predict"), "Loaded object is not a model with 'predict' method"
 
 
 def test_visualizations_exist():
