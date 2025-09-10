@@ -3,7 +3,7 @@ import subprocess
 import pickle
 import pandas as pd
 import pytest
-
+import joblib 
 
 def run_script(script):
     """Helper to run a script and return result."""
