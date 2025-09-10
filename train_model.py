@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 import joblib
 from utils import safe_makedirs
+from sklearn.datasets import load_iris
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report
@@ -12,10 +13,22 @@ from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
+
 # Ensure directories exist
 safe_makedirs("data")
 safe_makedirs("data/filtered")
 safe_makedirs("models")
+
+X, y = load_iris(return_X_y=True)
+
+# Train model
+model = RandomForestClassifier(n_estimators=100, random_state=42)
+model.fit(X, y)
+
+# Save model
+joblib.dump(model, "models/random_forest.pkl")
+print("Model saved successfully!")
+
 
 FILTERED_CSV = "data/filtered_data.csv"
 MODEL_PATH = "models/random_forest_pipeline.pkl"
