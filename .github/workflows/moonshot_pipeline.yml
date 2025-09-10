@@ -40,7 +40,11 @@ jobs:
         name: trained-model
         path: random_forest.pkl
         
-    - name: Run tests 
-      run: |
-        pip install pytest
-        pytest -v
+    - name: Run script filter
+      run: python filter.py
+
+    - name: Run training script 
+      run: python train_model.py
+
+    - name: Run tests
+      run: pytest -v 
