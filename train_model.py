@@ -51,15 +51,15 @@ X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, random_state=42
 )
 
-models = RandomForestClassifier(n_estimators=100, random_state=42)
-models.fit(X_train, y_train)
+model = RandomForestClassifier(n_estimators=100, random_state=42)
+modes.fit(X_train, y_train)
 
 y_pred = model.predict(X_test)
 print("[INFO] Classification Report:")
 print(classification_report(y_test, y_pred))
 
 # === 4️⃣ Save trained model ===
-joblib.dump(models, MODEL_PATH)
+joblib.dump(model, MODEL_PATH)
 print(f"[INFO] Model saved → {MODEL_PATH}")
 
 print("[INFO] train_model.py completed successfully ✅")
