@@ -11,7 +11,7 @@ from sklearn.impute import SimpleImputer
 from utils import safe_makedirs
 
 # CONFIG
-CSV_PATH = "data/filtered_output.csv"  # your CSV path
+CSV_PATH = "data/curated/filtered_output.csv"  # your CSV path
 TARGET_COLUMN = "your_target_column"   # replace with your label column
 
 # Ensure models directory exists
