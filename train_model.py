@@ -41,6 +41,10 @@ if not os.path.exists(DATA_PATH):
 
 df = pd.read_csv(DATA_PATH)
 print(f"[INFO] Loaded dataset with shape {df.shape}")
+
+target_column = df.columns[-1]
+print(f"[INFO] Using target column: {target_column}")
+
  
 # === 2️⃣ Prepare features and target ===
 TARGET_COL = target_column  # auto-detected or user-provided
