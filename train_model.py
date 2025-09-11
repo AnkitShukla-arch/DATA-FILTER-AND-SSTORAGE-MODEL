@@ -33,7 +33,7 @@ def load_config():
 
 config = load_config()
 DATA_PATH = config.get("data_path", DATA_PATH)
-TARGET_COLUMN = config.get("target_col", None)
+TARGET_COLUMN= config.get("target_col", None)
 
 # Load data
 if not os.path.exists(DATA_PATH):
@@ -41,9 +41,9 @@ if not os.path.exists(DATA_PATH):
 
 df = pd.read_csv(DATA_PATH)
 print(f"[INFO] Loaded dataset with shape {df.shape}")
-
+ 
 # === 2️⃣ Prepare features and target ===
-TARGET_COLUMN = target_column  # auto-detected or user-provided
+TARGET_COL = target_col  # auto-detected or user-provided
 
 # Handle missing target values with dummy replacements
 if df[TARGET_COLUMN].dtype == "object" or df[TARGET_COLUMN].dtype.name == "category":
