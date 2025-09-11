@@ -36,15 +36,39 @@ DATA_PATH = config.get("data_path", DATA_PATH)
 TARGET_COLUMN= config.get("target_col", None)
 
 # Load data
-if not os.path.exists(DATA_PATH):
-    raise FileNotFoundError(f"[ERROR] Missing dataset at {DATA_PATH}")
+# === 1 Load data ===
+print("[INFO] Starting train_model.py...")
 
-df = pd.read_csv(DATA_PATH)
+df = pd.read_csv(DATA_PATH, na_values=["null", "NULL", "NaN", "", " "])
 print(f"[INFO] Loaded dataset with shape {df.shape}")
 
-target_column = df.columns[-1]
-print(f"[INFO] Using target column: {target_column}")
+# === 2 Detect target column ===
+TARGET_COLUMN = detect_target(df, TARGET_COLUMN)
+print(f"[INFO] Using target column: {TARGET_COLUMN}")
 
+# === 3 Prepare features and target ===
+X = df.drop(columns=[TARGET_COLUMN])
+y = df[TARGET_COLUMN]
+
+# --- Handle missing values in features ---
+for col in X.columns:
+    if X[col].dtype == "object" or X[col].dtype.name == "category":
+        X[col] = X[col].fillna("Unknown")
+    else:
+        X[col] = X[col].fillna(-1)
+
+# --- Handle missing values in target ---
+if y.dtype == "object" or y.dtype.name == "category":
+    y = y.fillna("Unknown")
+else:
+    y = y.fillna(-1)
+
+# Extra guarantee: wipe any lingering NaNs
+X = X.fillna("Unknown")  # categorical leftovers
+y = y.fillna("Unknown") if y.dtype == "object" else y.fillna(-1)
+
+print(f"[INFO] Any NaNs left in features? {X.isna().sum().sum()}")
+print(f"[INFO] Any NaNs left in target? {y.isna().sum()}")
  
 
 # === 2 Prepare features and target ===
