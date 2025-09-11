@@ -46,26 +46,26 @@ target_column = df.columns[-1]
 print(f"[INFO] Using target column: {target_column}")
 
  
-# === 2️⃣ Prepare features and target ===
 
-# Auto-detect target column if not already set
-if "target_column" not in locals() or target_column is None:
-    target_column = df.columns[-1]  # fallback: use last column
+# === 2 Prepare features and target ===
+TARGET_COLUMN = target_column  # auto-detected or user-provided
 
-TARGET_COLUMN = target_column
-print(f"[INFO] Using target column: {TARGET_COLUMN}")
-
-# Handle missing values in target column
-if df[TARGET_COLUMN].dtype == "object" or df[TARGET_COLUMN].dtype.name == "category":
-    df[TARGET_COLUMN] = df[TARGET_COLUMN].fillna("Unknown")
-else:
-    df[TARGET_COLUMN] = df[TARGET_COLUMN].fillna(-1)
-
-# Split features and target
+# Separate features and target
 X = df.drop(columns=[TARGET_COLUMN])
 y = df[TARGET_COLUMN]
 
+# --- Handle missing values in features ---
+for col in X.columns:
+    if X[col].dtype == "object" or X[col].dtype.name == "category":
+        X[col] = X[col].fillna("Unknown")   # fill missing categorical with 'Unknown'
+    else:
+        X[col] = X[col].fillna(-1)          # fill missing numeric with -1
 
+# --- Handle missing values in target ---
+if y.dtype == "object" or y.dtype.name == "category":
+    y = y.fillna("Unknown")   # dummy for categorical targets
+else:
+    y = y.fillna(-1)          # dummy for numeric targets
 
 # Detect target col
 def detect_target(df, provided):
