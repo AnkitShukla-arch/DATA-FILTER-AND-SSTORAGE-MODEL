@@ -85,6 +85,14 @@ print(f"[INFO] Using target column: {target_col}")
 X = df.drop(columns=[target_col])
 y = df[target_col]
 
+# === Fill missing values in features as well ===
+for col in X.columns:
+    if X[col].dtype == "object" or X[col].dtype.name == "category":
+        X[col] = X[col].fillna("Unknown")   # dummy for categorical
+    else:
+        X[col] = X[col].fillna(-1)          # dummy for numeric
+
+
 # Split
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, random_state=42
