@@ -1,4 +1,4 @@
-name: Moonshot Data Pipeline
+name: Moonshot Pipeline
 
 on:
   push:
@@ -7,47 +7,28 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:
+  build-test-train:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout repo
+        uses: actions/checkout@v3
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: "3.10"
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pandas scikit-learn joblib matplotlib pyyaml pytest
 
-    - name: Run Data Filter & Model Training
-      run: |
-        python filter.py
+      - name: Run filter.py
+        run: python filter.py
 
-    - name: Upload filtered dataset
-      uses: actions/upload-artifact@v4
-      with:
-        name: filtered-data
-        path: data/curated/filtered_data.csv
+      - name: Run train_model.py
+        run: python train_model.py
 
-    - name: Upload trained model
-      uses: actions/upload-artifact@v4
-      with:
-        name: trained-model
-        path: random_forest.pkl
-        
-    - name: Run script filter
-      run: python filter.py
-
-    - name: Run training script 
-      run: python train_model.py
-
-    - name: Run tests
-      run: pytest -v 
-
-    - name: Run debug
-      run: python debug.py
+      - name: Run tests
+        run: pytest -v --maxfail=1 --disable-warnings
