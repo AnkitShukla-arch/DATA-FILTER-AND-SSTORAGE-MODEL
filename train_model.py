@@ -47,48 +47,24 @@ print(f"[INFO] Using target column: {target_column}")
 
  
 # === 2️⃣ Prepare features and target ===
-from sklearn.impute import SimpleImputer
-from sklearn.preprocessing import OneHotEncoder, StandardScaler
-from sklearn.compose import ColumnTransformer
-from sklearn.pipeline import Pipeline
 
-# === Separate features/target ===
+# Auto-detect target column if not already set
+if "target_column" not in locals() or target_column is None:
+    target_column = df.columns[-1]  # fallback: use last column
+
+TARGET_COLUMN = target_column
+print(f"[INFO] Using target column: {TARGET_COLUMN}")
+
+# Handle missing values in target column
+if df[TARGET_COLUMN].dtype == "object" or df[TARGET_COLUMN].dtype.name == "category":
+    df[TARGET_COLUMN] = df[TARGET_COLUMN].fillna("Unknown")
+else:
+    df[TARGET_COLUMN] = df[TARGET_COLUMN].fillna(-1)
+
+# Split features and target
 X = df.drop(columns=[TARGET_COLUMN])
 y = df[TARGET_COLUMN]
 
-# Detect column types
-numeric_features = X.select_dtypes(include=["int64", "float64"]).columns.tolist()
-categorical_features = X.select_dtypes(include=["object", "category"]).columns.tolist()
-
-print(f"[INFO] Numeric cols: {numeric_features}")
-print(f"[INFO] Categorical cols: {categorical_features}")
-
-# === Preprocessing Pipelines ===
-numeric_transformer = Pipeline(steps=[
-    ("imputer", SimpleImputer(strategy="mean")),     # fill NaN numbers with mean
-    ("scaler", StandardScaler())
-])
-
-categorical_transformer = Pipeline(steps=[
-    ("imputer", SimpleImputer(strategy="constant", fill_value="Unknown")),  # fill NaN text with "Unknown"
-    ("onehot", OneHotEncoder(handle_unknown="ignore"))
-])
-
-# Combine preprocessing
-preprocessor = ColumnTransformer(
-    transformers=[
-        ("num", numeric_transformer, numeric_features),
-        ("cat", categorical_transformer, categorical_features)
-    ]
-)
-
-# === Final pipeline with model ===
-from sklearn.ensemble import RandomForestClassifier
-
-model = Pipeline(steps=[
-    ("preprocessor", preprocessor),
-    ("classifier", RandomForestClassifier(n_estimators=100, random_state=42))
-])
 
 
 # Detect target col
