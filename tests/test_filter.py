@@ -5,7 +5,7 @@ import joblib
 
 from filter import main as filter_main
 
-FILTERED_CSV = "data/filtered_output.csv"
+FILTERED_CSV = "data/incoming/mydata.csv"
 MODEL_PATH = "models/random_forest.pkl"
 
 def test_filtered_csv_created():
