@@ -33,7 +33,7 @@ def load_config():
 
 config = load_config()
 DATA_PATH = config.get("data_path", DATA_PATH)
-TARGET_COL = config.get("target_col", None)
+TARGET_COLUMN = config.get("target_col", None)
 
 # Load data
 if not os.path.exists(DATA_PATH):
