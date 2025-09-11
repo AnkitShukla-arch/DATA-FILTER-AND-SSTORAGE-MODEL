@@ -76,7 +76,7 @@ def detect_target(df, provided):
             return cand
     return df.columns[-1]
 
-target_col = detect_target(df, TARGET_COL)
+target_col = detect_target(df, TARGET_COLUMN)
 if target_col not in df.columns:
     raise ValueError(f"[ERROR] Target column '{target_col}' not found.")
 
