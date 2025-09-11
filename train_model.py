@@ -43,7 +43,7 @@ df = pd.read_csv(DATA_PATH)
 print(f"[INFO] Loaded dataset with shape {df.shape}")
  
 # === 2️⃣ Prepare features and target ===
-TARGET_COL = target_col  # auto-detected or user-provided
+TARGET_COL = target_column  # auto-detected or user-provided
 
 # Handle missing target values with dummy replacements
 if df[TARGET_COLUMN].dtype == "object" or df[TARGET_COLUMN].dtype.name == "category":
