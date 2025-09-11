@@ -42,6 +42,19 @@ if not os.path.exists(DATA_PATH):
 df = pd.read_csv(DATA_PATH)
 print(f"[INFO] Loaded dataset with shape {df.shape}")
 
+# === 2️⃣ Prepare features and target ===
+TARGET_COLUMN = target_column  # auto-detected or user-provided
+
+# Handle missing target values with dummy replacements
+if df[TARGET_COLUMN].dtype == "object" or df[TARGET_COLUMN].dtype.name == "category":
+    df[TARGET_COLUMN] = df[TARGET_COLUMN].fillna("Unknown")
+else:
+    df[TARGET_COLUMN] = df[TARGET_COLUMN].fillna(-1)
+
+X = df.drop(columns=[TARGET_COLUMN])
+y = df[TARGET_COLUMN]
+
+
 # Detect target col
 def detect_target(df, provided):
     if provided and provided in df.columns:
