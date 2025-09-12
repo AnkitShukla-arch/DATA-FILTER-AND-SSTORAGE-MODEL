@@ -2,6 +2,7 @@
 import os
 import subprocess
 import joblib
+import importlib.util
 
 def run_script(script):
     return subprocess.run(["python", script], capture_output=True, text=True)
@@ -28,7 +29,19 @@ def test_model_pickle_valid():
     assert model is not None, "Failed to load trained model"
 
 def test_visualizations_exist():
-    viz_dir = "visualizations.py"
-    assert os.path.exists(viz_dir), "visualizations dir missing"
+    # 1️⃣ Ensure visualizations.py exists
+    viz_file = "visualizations.py"
+    assert os.path.exists(viz_file), "visualizations.py script is missing"
+
+    # 2️⃣ Ensure the script is importable
+    spec = importlib.util.spec_from_file_location("visualizations", viz_file)
+    assert spec is not None, "Failed to load visualizations.py"
+
+    # 3️⃣ Ensure the output folder exists
+    viz_dir = "data/visuals"
+    assert os.path.isdir(viz_dir), f"{viz_dir} folder missing. Run visualizations.py to generate it."
+
+    # 4️⃣ Ensure plots exist inside folder
     files = os.listdir(viz_dir)
-    assert len(files) > 0, "No visualizations generated"
+    plot_files = [f for f in files if f.endswith(".png")]
+    assert len(plot_files) > 0, "No plots generated in data/visuals"
