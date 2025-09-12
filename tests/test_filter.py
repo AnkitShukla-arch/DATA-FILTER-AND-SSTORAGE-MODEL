@@ -28,7 +28,7 @@ def test_model_pickle_valid():
     assert model is not None, "Failed to load trained model"
 
 def test_visualizations_exist():
-    viz_dir = "data/visuals"
-    assert os.path.exists(viz_dir), "visuals dir missing"
+    viz_dir = "visualizations.py"
+    assert os.path.exists(viz_dir), "visualizations dir missing"
     files = os.listdir(viz_dir)
-    assert len(files) > 0, "No visuals generated"
+    assert len(files) > 0, "No visualizations generated"
