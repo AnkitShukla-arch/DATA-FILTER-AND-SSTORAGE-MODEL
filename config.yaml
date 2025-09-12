@@ -53,7 +53,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: visualizations
-          path: data/visualizations/
+          path: data/visuals/
           retention-days: 7
 
           - name: Run training script
