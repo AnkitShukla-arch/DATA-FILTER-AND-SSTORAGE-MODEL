@@ -34,7 +34,7 @@ import yaml
 DEFAULT_DATA_PATH = "data/incoming/mydata.csv"   # change if you put csv elsewhere
 MODEL_DIR = "models"
 MODEL_PATH = os.path.join(MODEL_DIR, "random_forest.pkl")
-VIZ_DIR = "data/visuals"
+#VIZ_DIR = "data/visuals"
 CONFIG_PATH = "config.yml"
 
 safe_makedirs(VIZ_DIR,force=True)
