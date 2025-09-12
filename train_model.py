@@ -23,6 +23,7 @@ from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report
+from utils import safe_makedirs
 
 # Optional config
 import yaml
@@ -36,9 +37,7 @@ MODEL_PATH = os.path.join(MODEL_DIR, "random_forest.pkl")
 VIZ_DIR = "data/visuals"
 CONFIG_PATH = "config.yml"
 
-os.makedirs(MODEL_DIR, exist_ok=True)
-os.makedirs(VIZ_DIR, exist_ok=True)
-
+safe_makedirs(VIZ_DIR)
 def load_config(path=CONFIG_PATH):
     if os.path.exists(path):
         try:
