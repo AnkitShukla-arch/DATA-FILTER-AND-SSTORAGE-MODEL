@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 # Directory where plots will be stored
-VIZ_DIR = "data/visualization"
+VIZ_DIR = "data/visuals"
 os.makedirs(VIZ_DIR, exist_ok=True)
 
 def generate_visualizations(csv_path="data/incoming/mydata.csv"):
