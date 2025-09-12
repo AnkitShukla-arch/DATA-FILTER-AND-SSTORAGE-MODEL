@@ -1,59 +1,48 @@
-# visualizations.py  (CI-friendly)
-import matplotlib
-matplotlib.use("Agg")
+# visualizations.py
+import os
+import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-import pandas as pd
-import os
 
-def _save_fig(save_path, fig_name):
-    os.makedirs(save_path, exist_ok=True)
-    full = os.path.join(save_path, fig_name)
-    plt.savefig(full, bbox_inches="tight")
-    plt.close()
+# Directory where plots will be stored
+VIZ_DIR = "data/visualizations"
+os.makedirs(VIZ_DIR, exist_ok=True)
 
-def plot_target_distribution(y, save_path=None, name="target_dist.png"):
-    if y is None:
-        print("[WARN] no y")
+def generate_visualizations(csv_path="data/filtered_data.csv"):
+    """Generate basic visualizations and save them into data/visualizations/"""
+    if not os.path.exists(csv_path):
+        print(f"[WARN] {csv_path} not found, skipping visualizations.")
         return
-    fig = plt.figure(figsize=(6,4))
-    sns.countplot(x=y)
-    plt.title("Target Distribution")
-    if save_path:
-        _save_fig(save_path, name)
-    else:
-        plt.show()
+
+    df = pd.read_csv(csv_path)
+
+    # === 1️⃣ Histogram for numeric columns ===
+    numeric_cols = df.select_dtypes(include="number").columns
+    for col in numeric_cols[:3]:  # limit to first 3 to keep it fast
+        plt.figure()
+        sns.histplot(df[col].dropna(), kde=True)
+        plt.title(f"Histogram of {col}")
+        plt.savefig(os.path.join(VIZ_DIR, f"hist_{col}.png"))
         plt.close()
 
-def plot_feature_importance(model, feature_names, save_path=None, name="feature_imp.png", top_n=20):
-    if model is None:
-        print("[WARN] no model")
-        return
-    import numpy as np
-    importances = getattr(model, "feature_importances_", None)
-    if importances is None:
-        print("[WARN] model has no feature_importances_")
-        return
-    df = pd.DataFrame({"feature": feature_names, "importance": importances})
-    df = df.sort_values("importance", ascending=False).head(top_n)
-    fig = plt.figure(figsize=(10,6))
-    sns.barplot(x="importance", y="feature", data=df)
-    plt.title("Feature Importance")
-    if save_path:
-        _save_fig(save_path, name)
-    else:
-        plt.show()
+    # === 2️⃣ Count plot for categorical columns ===
+    categorical_cols = df.select_dtypes(include="object").columns
+    for col in categorical_cols[:2]:  # limit to first 2 for speed
+        plt.figure()
+        sns.countplot(y=col, data=df, order=df[col].value_counts().index)
+        plt.title(f"Count Plot of {col}")
+        plt.savefig(os.path.join(VIZ_DIR, f"count_{col}.png"))
         plt.close()
 
-def plot_correlation_heatmap(df, save_path=None, name="corr_heatmap.png"):
-    if df is None or df.empty:
-        print("[WARN] empty df")
-        return
-    fig = plt.figure(figsize=(12,8))
-    sns.heatmap(df.corr(), annot=True, fmt=".2f", cmap="coolwarm")
-    plt.title("Correlation Heatmap")
-    if save_path:
-        _save_fig(save_path, name)
-    else:
-        plt.show()
+    # === 3️⃣ Correlation heatmap ===
+    if len(numeric_cols) > 1:
+        plt.figure(figsize=(8, 6))
+        sns.heatmap(df[numeric_cols].corr(), annot=True, cmap="coolwarm")
+        plt.title("Correlation Heatmap")
+        plt.savefig(os.path.join(VIZ_DIR, "heatmap.png"))
         plt.close()
+
+    print(f"[INFO] Visualizations saved in {VIZ_DIR}")
+
+if __name__ == "__main__":
+    generate_visualizations()
