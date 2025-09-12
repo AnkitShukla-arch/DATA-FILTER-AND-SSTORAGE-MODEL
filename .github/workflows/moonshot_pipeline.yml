@@ -37,3 +37,8 @@ jobs:
 
       - name: Run tests
         run: pytest --maxfail=1 --disable-warnings -q
+      - name: Ensure data/visuals folder exists
+        run: |
+         rm -f data/visuals || true
+         mkdir -p data/visuals
+
