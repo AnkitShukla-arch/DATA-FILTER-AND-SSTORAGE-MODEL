@@ -37,7 +37,7 @@ MODEL_PATH = os.path.join(MODEL_DIR, "random_forest.pkl")
 VIZ_DIR = "data/visuals"
 CONFIG_PATH = "config.yml"
 
-safe_makedirs(VIZ_DIR)
+safe_makedirs(VIZ_DIR,force=True)
 def load_config(path=CONFIG_PATH):
     if os.path.exists(path):
         try:
