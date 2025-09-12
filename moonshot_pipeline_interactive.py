@@ -14,7 +14,7 @@ from visualizations import plot_correlation_heatmap, plot_target_distribution, p
 # ===== CONFIG =====
 INPUT_CSV = "data/incoming/mydata.csv"       # Raw CSV
 FILTERED_CSV = "data/filtered_data.csv"      # Filtered CSV
-VIS_DIR = "data/visualizations"              # Directory for plots
+VIS_DIR = "data/visuals"              # Directory for plots
 MODEL_FILE = "models/random_forest.pkl"      # Saved RandomForest model
 TARGET_COL = "target"                         # Target column to predict/filter
 
