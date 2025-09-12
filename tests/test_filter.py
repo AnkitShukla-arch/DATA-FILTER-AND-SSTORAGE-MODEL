@@ -16,10 +16,10 @@ def test_train_model_runs():
 
 def test_filtered_csv_exists_and_valid():
     path = "data/incoming/mydata.csv"
-    assert os.path.exists(path), "filtered_data.csv missing"
+    assert os.path.exists(path), "mydata.csv missing"
     import pandas as pd
     df = pd.read_csv(path)
-    assert not df.empty, "filtered_data.csv is empty"
+    assert not df.empty, "mydata.csv is empty"
 
 def test_model_pickle_valid():
     model_path = "models/random_forest.pkl"
