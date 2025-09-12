@@ -29,6 +29,11 @@ jobs:
 
       - name: Run train_model.py
         run: python train_model.py
+        
+      - name: Run visualization script
+        run: |
+           python visualizations.py
+
 
       - name: Run tests
         run: pytest -v --maxfail=1 --disable-warnings
