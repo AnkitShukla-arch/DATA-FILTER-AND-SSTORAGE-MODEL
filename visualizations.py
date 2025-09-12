@@ -8,7 +8,7 @@ import seaborn as sns
 VIZ_DIR = "data/visualizations"
 os.makedirs(VIZ_DIR, exist_ok=True)
 
-def generate_visualizations(csv_path="data/filtered_data.csv"):
+def generate_visualizations(csv_path="data/incoming/mydata.csv"):
     """Generate basic visualizations and save them into data/visualizations/"""
     if not os.path.exists(csv_path):
         print(f"[WARN] {csv_path} not found, skipping visualizations.")
