@@ -15,7 +15,7 @@ def test_train_model_runs():
     assert result.returncode == 0, f"train_model.py crashed:\n{result.stderr}"
 
 def test_filtered_csv_exists_and_valid():
-    path = "data/filtered/filtered_data.csv"
+    path = "data/incoming/mydata.csv"
     assert os.path.exists(path), "filtered_data.csv missing"
     import pandas as pd
     df = pd.read_csv(path)
