@@ -29,6 +29,6 @@ def test_model_pickle_valid():
 
 def test_visualizations_exist():
     viz_dir = "data/visuals"
-    assert os.path.exists(viz_dir), "visualizations dir missing"
+    assert os.path.exists(viz_dir), "visuals dir missing"
     files = os.listdir(viz_dir)
-    assert len(files) > 0, "No visualizations generated"
+    assert len(files) > 0, "No visuals generated"
